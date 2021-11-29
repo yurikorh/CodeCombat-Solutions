@@ -38,9 +38,9 @@ def summonTroops():
 
 # commands attack
 def commandSoldiers():
-    for soldier in hero.findFriends():
-        enemy = hero.findNearestEnemy()
-        if enemy and soldier.type != 'arrow-tower':
+    enemy = hero.findNearestEnemy()
+    if enemy:
+        for soldier in hero.built:
             hero.command(soldier, "attack", enemy)
 
 
