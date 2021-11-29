@@ -9,3 +9,6 @@ hero.attack(enemyNames[1])
 hero.attack(enemyNames[2])
 # Attack the last element:
 hero.attack(enemyNames[3])
+
+#for enemy in enemyNames:
+# hero.attack(enemy)
