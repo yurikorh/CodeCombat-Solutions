@@ -1,13 +1,19 @@
-# http://codecombat.com/play/level/sarven-treasure
 while True:
-    enemys = hero.findEnemies()
-    items = hero.findItems()
-    item = hero.findNearest(items)
-    enemy = hero.findNearest(enemys)
-    if (enemy and hero.distanceTo(enemy) < 15):
-        hero.attack(enemy)
-    elif (item):
-        if (hero.isReady('jump')):
-            hero.jumpTo(item.pos)
+    enemy = hero.findNearestEnemy()
+    item = hero.findNearestItem()
+    portals = [{"x":5, "y":49}, {"x":5, "y":19}, {"x":76, "y":51}, {"x":77, "y":19}]
+    if item:
+        #if hero.distanceTo(enemy) > 10:
+        if enemy:
+            if hero.distanceTo(item) < item.distanceTo(enemy) - 4:
+                #safe to collect
+                hero.move(item.pos)
+            else:
+                nearest = hero.findNearest(portals)
+                if hero.isReady("jump"):
+                    hero.jumpTo(nearest)
+                else:
+                    hero.move(nearest)
         else:
             hero.move(item.pos)
+
