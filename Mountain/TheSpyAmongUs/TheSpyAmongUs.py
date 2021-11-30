@@ -3,33 +3,23 @@
 # But one of these peasants is an OGRE SPY!
 # We have a hint: the spy's name contains the letter "z"
 
-# This function checks if an array contains a certain number:
-def numberInArray(array, number):
-    for i in range(len(array)):
-        if array[i] == numb:
-            return True
-    return False
-
-
 # This function should check if a string contains a certain character:
 def letterInWord(word, letter):
     # Iterate over every index of the string and check if the character matches the letter:
-    for x in range(0, len(word), 1):
-        item = word.substr(x, 1)
-        if item == letter:
+    for i in range(len(word)):
+        character = word[i]
+        # if the character matches the letter，return True
+        if character == letter:
             return True
+    # the letter is not in the word，return False
     return False
-
-
-mineDistance = 5
 
 spyLetter = "z"
 friends = hero.findFriends()
 
-for j in range(len(friends)):
-    friendName = friends[j].id
+for friend in friends:
+    friendName = friend.id
     if letterInWord(friendName, spyLetter):
         # Reveal the spy!
         hero.say(friendName + " is a spy!")
-    else:
-        hero.say(friendName + " is a friend.")  # ∆ Remove this line after writing the letterInWord function.
+        # ∆ Remove this line after writing the letterInWord function.
