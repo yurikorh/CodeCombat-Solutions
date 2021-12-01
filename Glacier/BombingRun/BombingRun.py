@@ -5,7 +5,7 @@
 
 while True:
     enemy = hero.findNearestEnemy()
-    if enemy and hero.distanceTo(enemy) < 70:
+    if enemy:
         vector = Vector.subtract(enemy.pos, hero.pos)
         rad = Math.atan2(vector.y, vector.x)
         deg = rad * (180 / Math.PI)
