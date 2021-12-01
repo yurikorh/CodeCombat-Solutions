@@ -3,6 +3,11 @@
 # But one of these peasants is an OGRE SPY!
 # We have a hint: the spy's name contains the letter "z"
 
+# For some reason, the codecombat runtime doesn't support 'in' operator,
+# and the friend.id doesn't have functions in string module,
+# I couldn't find out what type that property excatly is, cause the type() method is not supported as well
+# but expressions such as friend.id == "yorik" returns True, which is confusing
+
 # This function should check if a string contains a certain character:
 def letterInWord(word, letter):
     # Iterate over every index of the string and check if the character matches the letter:
