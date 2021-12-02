@@ -1,57 +1,3 @@
-excepE = ['tower']
-dest = {'x': 78, 'y': 39}
-done = False
-
-
-def getPos(obj):
-    return obj.pos.x, obj.pos.y
-
-
-def toPos(x, y):
-    return {'x': x, 'y': y}
-
-
-def rushTo(xy):
-    if hero.isReady("jump"):
-        hero.jumpTo(xy)
-    hero.move(xy)
-
-
-def exclude(units, exceps):
-    return [u for u in units if u.type not in exceps]
-
-
-def farthest(enemies):
-    farthestD = 0
-    for enemy in enemies:
-        d = hero.distanceTo(enemy)
-        if d > farthestD and enemy.health > 0:
-            farthestD = d
-            farthest = enemy
-    return farthest
-
-
-def nearby(enemies, dis):
-    return sum([hero.distanceTo(e) < dis for e in enemies])
-
-
-def selfDying(self):
-    if self.health < self.maxHealth / 2:
-        hero.command(self, "move", {'x': self.pos.x - 1, 'y': self.pos.y})
-
-
-def evade():
-    x, y = getPos(hero)
-    orbs = hero.findEnemyMissiles()
-    if len(orbs):
-        orb = hero.findNearest(orbs)
-        if hero.distanceTo(orb) < 3:
-            if y > 14:
-                hero.moveXY(x, y - 7)
-            else:
-                hero.moveXY(x, y + 7)
-
-
 def lowHP():
     friends = hero.findFriends()
     lowest = 9999
@@ -64,98 +10,64 @@ def lowHP():
                 dying = friend
     return dying
 
-
-def soldierAtk(soldier):
-    selfDying(soldier)
-    enemies = hero.findByType("ogre")
-    if not len(enemies):
-        enemy = soldier.findNearestEnemy()
-    else:
-        enemy = enemies[0]
-    if enemy:
-        hero.command(soldier, "attack", enemy)
-    else:
-        hero.command(soldier, "move", soldier.pos)
-
-
-def archerAtk(archer):
+archerDest = Vector(55, 38)
+def commandArcher(archer):
     enemies = hero.findByType("chieftain")
-    if not len(enemies):
-        enemy = archer.findNearestEnemy()
-    else:
-        enemy = enemies[0]
-    if enemy and archer.pos.x > 53 and archer.pos.y < 40:
-        hero.command(archer, "attack", enemy)
-    elif hero.time > 6:
-        hero.command(archer, "move", dest)
-
-
-def riderAtk(rider):
-    enemies = hero.findByType("robot-walker")
     if len(enemies):
-        hero.command(rider, "move", {'x': enemies[0].pos.x / 2 + enemies[1].pos.x / 2,
-                                     'y': enemies[0].pos.y / 2 + enemies[1].pos.y / 2})
-
-
-def palaAtk(pala):
-    selfDying(pala)
-    dying = lowHP()
-    enemies = hero.findByType("witch")
-    if not len(enemies):
-        enemy = pala.findNearestEnemy()
-    else:
         enemy = enemies[0]
-    if dying and pala.canCast('heal'):
-        hero.command(pala, "cast", 'heal', dying)
+        if archer.distanceTo(archerDest) < 1:
+            hero.command(archer, "attack", enemy)
+        elif archer.distanceTo(enemy) > 20 or enemy.pos.x > 60:
+            hero.command(archer, "move", archerDest)
+        else:
+            hero.command(archer, "move", archer.pos)
+
+paladinDest = Vector(78, 40)
+def commandPaladin(paladin):
+    dying = lowHP()
+    if dying and paladin.canCast('heal'):
+        hero.command(paladin, "cast", 'heal', dying)
+    elif paladin.canCast('heal') and hero.health < 2 * hero.maxHealth / 3:
+        hero.command(paladin, "cast", 'heal', hero)
+    elif paladin.pos.x >= paladin.x:
+        hero.command(paladin, "shield")
     else:
-        hero.command(pala, "move", dest)
-    if pala.canCast('heal') and hero.health < 2 * hero.maxHealth / 3:
-        hero.command(pala, "cast", 'heal', hero)
-    if pala.pos == dest:
-        hero.command(pala, "shield")
-
-
-def summon(soldier):
-    while hero.gold >= hero.costOf(soldier):
-        hero.summon(soldier)
-
+        hero.command(paladin, "move", paladinDest)
 
 def command():
-    for unit in hero.findFriends():
-        t = unit.type
-        if t == 'griffin-rider':
-            riderAtk(unit)
-        elif t == 'soldier':
-            soldierAtk(unit)
-        elif t == 'paladin':
-            palaAtk(unit)
-        elif t == 'archer':
-            archerAtk(unit)
-
+    for friend in hero.findFriends():
+        type = friend.type
+        if type == 'paladin':
+            commandPaladin(friend)
+        elif type == 'archer':
+            commandArcher(friend)
 
 def atk():
-    if hero.gold > hero.costOf('griffin-rider'):
-        hero.summon('griffin-rider')
-    command()
-
-    enemies = hero.findByType("robot-walker")
-    if len(enemies):
-        pass
+    robots = hero.findByType("robot-walker")
+    if len(robots):
+        hero.move(Vector(14, 21))
     else:
-        enemy = hero.findNearest([e for e in hero.findEnemies() if e.type not in ['ice-yak', 'cow']])
-        if enemy:
-            command()
-            if hero.canCast("chain-lightning", enemy) and hero.time > 7:
-                hero.cast("chain-lightning", enemy)
-        elif not len(enemies):
-            hero.move({'x': 78, 'y': 14})
-    return True
+        chief = hero.findNearest(hero.findByType("chieftain"))
+        if chief:
+            witch = hero.findNearest(hero.findByType("witch"))
+            if witch and hero.canCast("chain-lightning", witch) and chief.pos.x > 60:
+                hero.cast("chain-lightning", witch)
+            hero.move(Vector(62, 18))
+        else:
+            hero.move(Vector(78, 14))
 
 
 def run():
+    hero.move(Vector(14, 21))
+    robots = hero.findByType("robot-walker")
+    hero.summon("griffin-rider")
+    rider = hero.findByType("griffin-rider")[0]
+    riderTarget = Vector.add(robots[0].pos, robots[1].pos)
+    riderTarget = Vector.divide(riderTarget, 2)
+    hero.command(rider, "move", riderTarget)
+    
     while True:
-        evade()
-        atk()
-
+        atk()   
+        command()
 
 run()
