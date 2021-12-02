@@ -1,0 +1,28 @@
+# "The Peasant"
+peasant = hero.findByType("peasant")[0]
+
+goldKey = peasant.findByType("gold-key")[0]
+silverKey = peasant.findByType("silver-key")[0]
+bronzeKey = peasant.findByType("bronze-key")[0]
+
+hero.command(peasant, "pickUpItem", goldKey)
+hero.command(peasant, "pickUpItem", silverKey)
+
+hero.command(peasant, "pickUpItem", bronzeKey)
+hero.moveXY(46, 35)
+
+hero.command(peasant, "dropItem", {"x": 40, "y": 34})
+
+hero.command(peasant, "dropItem", {"x": 31, "y": 34})
+
+hero.command(peasant, "dropItem", {"x": 22, "y": 34})
+hero.moveXY(14, 33)
+hero.jumpTo({"x": 10, "y": 10})
+hero.moveXY(10, 10)
+
+hero.summon("peasant")
+peasant1 = hero.built[-1]
+hero.command(peasant1, "move", {"x": 13, "y": 29})
+hero.wait(1)
+
+hero.moveXY(10, 58)
