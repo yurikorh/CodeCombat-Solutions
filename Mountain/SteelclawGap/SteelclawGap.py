@@ -27,13 +27,13 @@ def commandTroops():
     for friendIndex, friend in enumerate(friends):
         # Use % to wrap around defendPoints based on friendIndex
         defendPoint = defendPoints[i % len(defendPoints)]
-        if friend.type == 'archer' or friend.health < friend.maxHealth * 0.3:
+        # Command your minion to defend the defendPoint
+        if friend.type == 'archer':
             hero.command(friend, "defend", retreat(defendPoint))
+        elif friend.health < friend.maxHealth * 0.3:
+            hero.command(friend, "move", retreat(defendPoint))  
         else:
             hero.command(friend, "defend", defendPoint)
-        # Command your minion to defend the defendPoint
-
-
 while True:
     summonTroops()
     commandTroops()
