@@ -17,13 +17,20 @@ def summonTroops():
     if hero.gold >= hero.costOf(type):
         hero.summon(type)
 
+def retreat(defendPoint):
+    if defendPoint.x > 50:
+        return {"x": defendPoint.x - 5, "y": defendPoint.y}
+    return {"x": defendPoint.x + 5, "y": defendPoint.y}
 
 def commandTroops():
     friends = hero.findFriends()
     for friendIndex, friend in enumerate(friends):
         # Use % to wrap around defendPoints based on friendIndex
-        hero.command(friend, 'defend', defendPoints[friendIndex % len(defendPoints)])
-        pass
+        defendPoint = defendPoints[i % len(defendPoints)]
+        if friend.type == 'archer' or friend.health < friend.maxHealth * 0.3:
+            hero.command(friend, "defend", retreat(defendPoint))
+        else:
+            hero.command(friend, "defend", defendPoint)
         # Command your minion to defend the defendPoint
 
 
