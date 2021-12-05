@@ -1,4 +1,4 @@
-def lowHP():
+def weakestFriend():
     friends = hero.findFriends()
     lowest = 9999
     dying = None
@@ -10,54 +10,61 @@ def lowHP():
                 dying = friend
     return dying
 
-archerDest = Vector(55, 38)
-def commandArcher(archer):
-    enemies = hero.findByType("chieftain")
-    if len(enemies):
-        enemy = enemies[0]
-        if archer.distanceTo(archerDest) < 1:
-            hero.command(archer, "attack", enemy)
-        elif archer.distanceTo(enemy) > 20 or enemy.pos.x > 60:
-            hero.command(archer, "move", archerDest)
+def commandArcher(archer, chief):
+    if chief:
+        if archer.pos.y < 40:
+            hero.command(archer, "attack", chief)
+        elif archer.distanceTo(chief) > 20 or chief.pos.x > 60:
+            hero.command(archer, "move", chief.pos)
         else:
             hero.command(archer, "move", archer.pos)
 
+def commandSoldier(soldier, chief):
+    if chief:
+        if soldier.distanceTo(chief) > 20 or chief.pos.x > 60:
+            hero.command(soldier, "attack", chief)
+        else:
+            hero.command(soldier, "move", soldier.pos)
+            
 paladinDest = Vector(78, 40)
-def commandPaladin(paladin):
-    dying = lowHP()
+def commandPaladin(paladin, chief):
+    dying = weakestFriend()
     if dying and paladin.canCast('heal'):
         hero.command(paladin, "cast", 'heal', dying)
-    elif paladin.canCast('heal') and hero.health < 2 * hero.maxHealth / 3:
-        hero.command(paladin, "cast", 'heal', hero)
-    elif paladin.pos.x >= paladin.x:
-        hero.command(paladin, "shield")
+        return
+    if chief and chief.pos.x > 60 and chief.health > 100:
+        hero.command(paladin, "attack", chief)
     else:
         hero.command(paladin, "move", paladinDest)
 
-def command():
-    for friend in hero.findFriends():
-        type = friend.type
-        if type == 'paladin':
-            commandPaladin(friend)
-        elif type == 'archer':
-            commandArcher(friend)
+def commandRider():
+    pass
 
-def atk():
+commands = {'paladin': commandPaladin, 'archer': commandArcher, 'soldier': commandSoldier, 'griffin-rider': commandRider}
+
+def command(chief):
+    for friend in hero.findFriends():
+        commands[friend.type](friend, chief)
+
+def moveTo(target):
+    if hero.isReady("jump"):
+        hero.jumpTo(target)
+    hero.move(target)
+
+def atk(chief):
     robots = hero.findByType("robot-walker")
     if len(robots):
         hero.move(Vector(14, 21))
-    else:
-        chief = hero.findNearest(hero.findByType("chieftain"))
-        if chief:
-            witch = hero.findNearest(hero.findByType("witch"))
-            if witch and hero.canCast("chain-lightning", witch) and chief.pos.x > 60:
-                hero.cast("chain-lightning", witch)
-            hero.move(Vector(62, 18))
+    elif chief:
+        witch = hero.findNearest(hero.findByType("witch"))
+        if witch and hero.canCast("chain-lightning", witch) and chief.pos.x > 60:
+            hero.cast("chain-lightning", witch)
         else:
-            hero.move(Vector(78, 14))
+            hero.move(Vector(62, 14))
+    else:
+        moveTo(Vector(78, 14))
 
-
-def run():
+def cheatRobot():
     hero.move(Vector(14, 21))
     robots = hero.findByType("robot-walker")
     hero.summon("griffin-rider")
@@ -65,9 +72,13 @@ def run():
     riderTarget = Vector.add(robots[0].pos, robots[1].pos)
     riderTarget = Vector.divide(riderTarget, 2)
     hero.command(rider, "move", riderTarget)
-    
+
+def run():
+    cheatRobot()
     while True:
-        atk()   
-        command()
+        chief = hero.findNearest(hero.findByType("chieftain"))
+        atk(chief)   
+        command(chief)
 
 run()
+
